@@ -5,12 +5,10 @@ package com.drronidz;/*
     CREATED ON : 11:23 PM
 */
 
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Locations implements Map<Integer, Location> {
 
@@ -18,9 +16,13 @@ public class Locations implements Map<Integer, Location> {
 
     public static void main(String[] args) throws IOException {
 
-        try (FileWriter locFile = new FileWriter("locations.txt")) {
+        try (FileWriter locFile = new FileWriter("locations.txt") ;
+             FileWriter dirFile = new FileWriter("directions.txt")) {
             for(Location location : locations.values()) {
                 locFile.write(location.getLocationID() + "," + location.getDescription() + "\n");
+                for(String direction : location.getExits().keySet()) {
+                    dirFile.write(location.getLocationID() + "," + direction + "," + location.getExits().get(direction) + "\n");
+                }
             }
         }
        /* FileWriter locFile = null;
@@ -48,7 +50,21 @@ public class Locations implements Map<Integer, Location> {
     }
 
     static {
-        Map<String, Integer> tempExit = new HashMap<>();
+        try (Scanner scanner = new Scanner(new FileReader("locations.txt"))) {
+            scanner.useDelimiter(",");
+            while (scanner.hasNextLine()) {
+                int loc = scanner.nextInt();
+                scanner.skip(scanner.delimiter());
+                String description = scanner.nextLine();
+                System.out.println("Imported loc: " + loc + ": " + description);
+                Map<String, Integer> tempExit = new HashMap<>();
+                locations.put(loc, new Location(loc, description, tempExit));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+     /*   Map<String, Integer> tempExit = new HashMap<>();
         locations.put(0, new Location(0, "You are sitting in the front of a computer learning Java", null));
 
         tempExit = new HashMap<String, Integer>();
@@ -74,7 +90,7 @@ public class Locations implements Map<Integer, Location> {
         tempExit = new HashMap<String, Integer>();
         tempExit.put("S", 1);
         tempExit.put("W", 2);
-        locations.put(5, new Location(5, "You are in the forest",tempExit));
+        locations.put(5, new Location(5, "You are in the forest",tempExit));*/
     }
     @Override
     public int size() {
