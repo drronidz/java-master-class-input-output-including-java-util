@@ -16,12 +16,19 @@ public class Locations implements Map<Integer, Location> {
 
     private static Map<Integer, Location> locations = new HashMap<Integer, Location>();
 
-    public static void main(String[] args) {
-        FileWriter locFile = null;
+    public static void main(String[] args) throws IOException {
+
+        try (FileWriter locFile = new FileWriter("locations.txt")) {
+            for(Location location : locations.values()) {
+                locFile.write(location.getLocationID() + "," + location.getDescription() + "\n");
+            }
+        }
+       /* FileWriter locFile = null;
         try {
             locFile = new FileWriter("locations.txt");
             for(Location location: locations.values()) {
                 locFile.write(location.getLocationID() + "," + location.getDescription() + "\n");
+//                throw  new IOException("Test exception thrown while writing");
             }
             locFile.close();
         } catch (IOException e) {
@@ -37,7 +44,7 @@ public class Locations implements Map<Integer, Location> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     static {
