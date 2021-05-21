@@ -1,7 +1,6 @@
-package com.drronidz;
+package com.timbuchalka;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
