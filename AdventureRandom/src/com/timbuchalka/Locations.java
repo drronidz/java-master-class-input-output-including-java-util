@@ -9,6 +9,7 @@ import java.util.*;
 public class Locations implements Map<Integer, Location> {
     private static Map<Integer, Location> locations = new LinkedHashMap<Integer, Location>();
     private static Map<Integer, IndexRecord> index = new LinkedHashMap<>();
+    private static RandomAccessFile  randomAccessFile;
 
     public static void main(String[] args) throws IOException {
 
@@ -39,6 +40,13 @@ public class Locations implements Map<Integer, Location> {
                 index.put(location.getLocationID(), record);
                 startPointer = (int) randomAccessFile.getFilePointer();
             }
+
+            randomAccessFile.seek(indexStart);
+            for(Integer locationID : index.keySet()) {
+                randomAccessFile.writeInt(locationID);
+                randomAccessFile.writeInt(index.get(locationID).getStartByte());
+                randomAccessFile.writeInt(index.get(locationID).getLength());
+            }
         }
     }
 
@@ -49,8 +57,25 @@ public class Locations implements Map<Integer, Location> {
 
 
     static {
+        try {
+            randomAccessFile = new RandomAccessFile("locations_rand.dat", "rwd");
+            int numLocations = randomAccessFile.readInt();
+            long locationStartPoint = randomAccessFile.readInt();
 
-        try(ObjectInputStream locFile = new ObjectInputStream(new BufferedInputStream(new FileInputStream("locations.dat")))) {
+            while (randomAccessFile.getFilePointer() < locationStartPoint) {
+                int locationID = randomAccessFile.readInt();
+                int locationStart = randomAccessFile.readInt();
+                int locationLength = randomAccessFile.readInt();
+
+                IndexRecord record = new IndexRecord(locationStart, locationLength);
+                index.put(locationID, record);
+
+            }
+
+        } catch (IOException e) {
+            System.out.println("IOException in static initializer: " + e.getMessage());
+        }
+  /*      try(ObjectInputStream locFile = new ObjectInputStream(new BufferedInputStream(new FileInputStream("locations.dat")))) {
             boolean eof = false;
             while(!eof) {
                 try {
@@ -67,61 +92,8 @@ public class Locations implements Map<Integer, Location> {
             System.out.println("IO Exception" + io.getMessage());
         } catch(ClassNotFoundException e) {
             System.out.println("ClassNotFoundException " + e.getMessage());
-        }
-//            while(!eof) {
-//                try {
-//                    Map<String, Integer> exits = new LinkedHashMap<>();
-//                    int locID = locFile.readInt();
-//                    String description = locFile.readUTF();
-//                    int numExits = locFile.readInt();
-//                    System.out.println("Read location " + locID + " : " + description);
-//                    System.out.println("Found " + numExits + " exits");
-//                    for(int i=0; i<numExits; i++) {
-//                        String direction = locFile.readUTF();
-//                        int destination = locFile.readInt();
-//                        exits.put(direction, destination);
-//                        System.out.println("\t\t" + direction + "," + destination);
-//                    }
-//                    locations.put(locID, new com.timbuchalka.Location(locID, description, exits));
-//
-//                } catch(EOFException e) {
-//                    eof = true;
-//                }
-//
-//            }
+        }*/
 
-
-//        try(Scanner scanner = new Scanner(new BufferedReader(new FileReader("locations_big.txt")))) {
-//            scanner.useDelimiter(",");
-//            while(scanner.hasNextLine()) {
-//                int loc = scanner.nextInt();
-//                scanner.skip(scanner.delimiter());
-//                String description = scanner.nextLine();
-//                System.out.println("Imported loc: " + loc + ": " + description);
-//                Map<String, Integer> tempExit = new HashMap<>();
-//                locations.put(loc, new com.timbuchalka.Location(loc, description, tempExit));
-//            }
-//
-//        } catch(IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Now read the exits
-//        try (BufferedReader dirFile = new BufferedReader(new FileReader("directions_big.txt"))) {
-//            String input;
-//            while((input = dirFile.readLine()) != null) {
-//                String[] data = input.split(",");
-//                int loc = Integer.parseInt(data[0]);
-//                String direction = data[1];
-//                int destination = Integer.parseInt(data[2]);
-//
-//                System.out.println(loc + ": " + direction + ": " + destination);
-//                com.timbuchalka.Location location = locations.get(loc);
-//                location.addExit(direction, destination);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
     @Override
     public int size() {
