@@ -1,42 +1,64 @@
-package com.drronidz;/*
-    CREATED BY : ABD EL HALIM
-    PROJECT NAME : {IntelliJ IDEA}
-    CREATED ON : 5/19/2021 , 
-    CREATED ON : 11:23 PM
-*/
-
-import javafx.fxml.FXML;
+package com.drronidz;
 
 import java.io.*;
 import java.util.*;
 
-public class Locations implements Map<Integer, Location> {
 
-    private static Map<Integer, Location> locations = new HashMap<Integer, Location> ();
+public class Locations implements Map<Integer, Location> {
+    private static Map<Integer, Location> locations = new LinkedHashMap<Integer, Location>();
 
     public static void main(String[] args) throws IOException {
-        try (DataOutputStream locFile
-                     = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("locations.dat")))) {
+        try (DataOutputStream locFile = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("locations.dat")))) {
             for (Location location : locations.values()) {
                 locFile.writeInt(location.getLocationID());
                 locFile.writeUTF(location.getDescription());
-                System.out.println("writing location " + location.getLocationID() + " : " + location.getDescription());
+                System.out.println("Writing location " + location.getLocationID() + " : " + location.getDescription());
                 System.out.println("Writing " + (location.getExits().size() - 1) + " exits.");
                 locFile.writeInt(location.getExits().size() - 1);
-                for(String direction : location.getExits().keySet()) {
-                    System.out.println("\t\t" + direction + "," + location.getExits().get(direction));
-                    locFile.writeUTF(direction);
-                    locFile.writeInt(location.getExits().get(direction));
+                for (String direction : location.getExits().keySet()) {
+                    if (!direction.equalsIgnoreCase("Q")) {
+                        System.out.println("\t\t" + direction + "," + location.getExits().get(direction));
+                        locFile.writeUTF(direction);
+                        locFile.writeInt(location.getExits().get(direction));
+                    }
                 }
             }
         }
+
     }
 
     static {
 
+        try(DataInputStream locFile = new DataInputStream(new BufferedInputStream(new FileInputStream("locations.dat")))) {
+            boolean eof = false;
+            while(!eof) {
+                try {
+                    Map<String, Integer> exits = new LinkedHashMap<>();
+                    int locID = locFile.readInt();
+                    String description = locFile.readUTF();
+                    int numExits = locFile.readInt();
+                    System.out.println("Read location " + locID + " : " + description);
+                    System.out.println("Found " + numExits + " exits");
+                    for(int i=0; i<numExits; i++) {
+                        String direction = locFile.readUTF();
+                        int destination = locFile.readInt();
+                        exits.put(direction, destination);
+                        System.out.println("\t\t" + direction + "," + destination);
+                    }
+                    locations.put(locID, new Location(locID, description, exits));
+
+                } catch(EOFException e) {
+                    eof = true;
+                }
+
+            }
+        } catch(IOException io) {
+            System.out.println("IO Exception");
+        }
+
         try(Scanner scanner = new Scanner(new BufferedReader(new FileReader("locations_big.txt")))) {
             scanner.useDelimiter(",");
-            while (scanner.hasNextLine()) {
+            while(scanner.hasNextLine()) {
                 int loc = scanner.nextInt();
                 scanner.skip(scanner.delimiter());
                 String description = scanner.nextLine();
@@ -44,28 +66,27 @@ public class Locations implements Map<Integer, Location> {
                 Map<String, Integer> tempExit = new HashMap<>();
                 locations.put(loc, new Location(loc, description, tempExit));
             }
-        } catch (IOException e) {
+
+        } catch(IOException e) {
             e.printStackTrace();
         }
-
-        // Now read the exists
-        try (Scanner scanner = new Scanner(new BufferedReader(new FileReader("directions_big.txt")))) {
-
-            scanner.useDelimiter(",");
-            while (scanner.hasNextLine()) {
-                String input = scanner.nextLine();
-                String [] data = input.split(",");
-                int loc = Integer.parseInt(data[0]);
-                String direction = data [1];
-                int destination = Integer.parseInt(data[2]);
-
-                System.out.println(loc + ": " + direction + ": " + destination);
-                Location location = locations.get(loc);
-                location.addExit(direction, destination);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//
+//        // Now read the exits
+//        try (BufferedReader dirFile = new BufferedReader(new FileReader("directions_big.txt"))) {
+//            String input;
+//            while((input = dirFile.readLine()) != null) {
+//                String[] data = input.split(",");
+//                int loc = Integer.parseInt(data[0]);
+//                String direction = data[1];
+//                int destination = Integer.parseInt(data[2]);
+//
+//                System.out.println(loc + ": " + direction + ": " + destination);
+//                Location location = locations.get(loc);
+//                location.addExit(direction, destination);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
     @Override
     public int size() {
@@ -110,6 +131,7 @@ public class Locations implements Map<Integer, Location> {
     @Override
     public void clear() {
         locations.clear();
+
     }
 
     @Override
