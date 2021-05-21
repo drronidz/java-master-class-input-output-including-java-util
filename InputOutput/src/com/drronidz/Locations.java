@@ -5,12 +5,14 @@ package com.drronidz;/*
     CREATED ON : 11:23 PM
 */
 
+import javafx.fxml.FXML;
+
 import java.io.*;
 import java.util.*;
 
 public class Locations implements Map<Integer, Location> {
 
-    private static Map<Integer, Location> locations = new HashMap<Integer, Location>();
+    private static Map<Integer, Location> locations = new HashMap<Integer, Location> ();
 
     public static void main(String[] args) throws IOException {
 
@@ -48,9 +50,8 @@ public class Locations implements Map<Integer, Location> {
     }
 
     static {
-        Scanner scanner = null;
-        try  {
-            scanner = new Scanner(new FileReader("locations.txt"));
+
+        try(Scanner scanner = new Scanner(new FileReader("locations_big.txt"))) {
             scanner.useDelimiter(",");
             while (scanner.hasNextLine()) {
                 int loc = scanner.nextInt();
@@ -62,14 +63,12 @@ public class Locations implements Map<Integer, Location> {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if(scanner != null) {
-                scanner.close();
-            }
+
         }
 
-        try {
-            scanner = new Scanner(new BufferedReader(new FileReader("directions.txt")));
+        // Now read the exists
+        try (Scanner scanner = new Scanner(new BufferedReader(new FileReader("directions_big.txt")))) {
+
             scanner.useDelimiter(",");
             while (scanner.hasNextLine()) {
 //                int loc = scanner.nextInt();
@@ -90,10 +89,6 @@ public class Locations implements Map<Integer, Location> {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } finally {
-            if(scanner != null) {
-                scanner.close();
-            }
         }
 
      /*   Map<String, Integer> tempExit = new HashMap<>();
