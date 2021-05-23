@@ -52,24 +52,61 @@ public class Main {
             long int3pos = int2Pos + Integer.BYTES + outputBytes2.length;
             buffer.putInt(1000);
             buffer.flip();
-            
+
             binChannel.write(buffer);
 
             RandomAccessFile randomAccessFile = new RandomAccessFile("data.dat","rwd");
             FileChannel channel = randomAccessFile.getChannel();
 
-            ByteBuffer readBuffer = ByteBuffer.allocate(100);
+            ByteBuffer readBuffer = ByteBuffer.allocate(Integer.BYTES);
+
+            channel.position(int3pos);
             channel.read(readBuffer);
             readBuffer.flip();
-            byte[] inputString = new byte[outPutBytes.length];
-            readBuffer.get(inputString);
-            System.out.println("inputString = " + new String (inputString));
-            System.out.println("int1 = " + readBuffer.getInt());
-            System.out.println("int2 = " + readBuffer.getInt());
-            byte[] inputString2 = new byte[outPutBytes2.length];
-            readBuffer.get(inputString2);
-            System.out.println("inputString2 = " + new String(inputString2));
             System.out.println("int3 = " + readBuffer.getInt());
+            readBuffer.flip();
+
+            channel.position(int2Pos);
+            channel.read(readBuffer);
+            readBuffer.flip();
+            System.out.println("int2 = " + readBuffer.getInt());
+
+            channel.position(int1Pos);
+            readBuffer.flip();
+            channel.read(readBuffer);
+            readBuffer.flip();
+            System.out.println("int1 = " + readBuffer.getInt());
+
+            byte[] outputString = "Hello, World!".getBytes();
+            long stringPosition = 0;
+            long integerOnePosition = outputString.length;
+            long integerTwoPosition = integerOnePosition + Integer.BYTES;
+            byte[] outputStringTwo = "Nice to meet You".getBytes();
+            long stringTwoPosition = integerTwoPosition + Integer.BYTES;
+            long integerThreePosition = stringTwoPosition + outputStringTwo.length;
+
+            ByteBuffer integerBuffer = ByteBuffer.allocate(Integer.BYTES);
+            integerBuffer.putInt(245);
+            integerBuffer.flip();
+            binChannel.position(integerOnePosition);
+            binChannel.write(integerBuffer);
+
+            integerBuffer.flip();
+            integerBuffer.putInt(-98765);
+            integerBuffer.flip();
+            binChannel.position(integerTwoPosition);
+            binChannel.write(integerBuffer);
+
+            integerBuffer.flip();
+            integerBuffer.putInt(1000);
+            integerBuffer.flip();
+            binChannel.position(integerThreePosition);
+            binChannel.write(integerBuffer);
+
+            binChannel.position(stringPosition);
+            binChannel.write(ByteBuffer.wrap(outputString));
+            binChannel.position(stringTwoPosition);
+            binChannel.write(ByteBuffer.wrap(outputBytes2));
 
         } catch (IOException e) {
             e.printStackTrace();
