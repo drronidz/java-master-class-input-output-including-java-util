@@ -8,10 +8,39 @@ package com.drronidz;/*
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.Pipe;
 
 public class Main {
     public static void main(String[] args) {
-        try (FileOutputStream binFile = new FileOutputStream("data.dat");
+
+        try {
+            Pipe pipe = Pipe.open();
+
+            Runnable reader = () -> {
+                try {
+                    Pipe.SourceChannel sourceChannel = pipe.source();
+                    ByteBuffer buffer = ByteBuffer.allocate(56);
+
+                    for (int i=0; i<10; i++) {
+                        int bytesRead = sourceChannel.read(buffer);
+                        byte[] timeString = new byte[bytesRead];
+                        buffer.flip();
+                        buffer.get(timeString);
+                        System.out.println("Reader Thread: " + new String(timeString));
+                        buffer.flip();
+                        Thread.sleep(100);
+                    }
+
+                } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
+                }
+            };
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+     /*   try (FileOutputStream binFile = new FileOutputStream("data.dat");
              FileChannel binChannel = binFile.getChannel()) {
 
             ByteBuffer buffer = ByteBuffer.allocate(100);
@@ -20,7 +49,7 @@ public class Main {
             buffer.put(outPutBytes).putInt(245).putInt(-98765).put(outPutBytes2).putInt(1000);
             buffer.flip();
 
-            /*
+            *//*
             * read(ByteBuffer) - reads bytes beginning at the channel's current position, and after
             *                    the read, updates the position accordingly.
             *                    Note that now we're talking about the channel's position, not the byte
@@ -33,7 +62,7 @@ public class Main {
             *
             *
             *
-            * */
+            * *//*
 
 //            buffer.put(outPutBytes);
 //            buffer.putInt(245);
@@ -77,39 +106,21 @@ public class Main {
             readBuffer.flip();
             System.out.println("int1 = " + readBuffer.getInt());
 
-            byte[] outputString = "Hello, World!".getBytes();
-            long stringPosition = 0;
-            long integerOnePosition = outputString.length;
-            long integerTwoPosition = integerOnePosition + Integer.BYTES;
-            byte[] outputStringTwo = "Nice to meet You".getBytes();
-            long stringTwoPosition = integerTwoPosition + Integer.BYTES;
-            long integerThreePosition = stringTwoPosition + outputStringTwo.length;
+            RandomAccessFile copyFile = new RandomAccessFile("datacopy.dat","rw");
+            FileChannel copyChannel = copyFile.getChannel();
+            channel.position(0);
+//            long numTransferred = copyChannel.transferFrom(channel, 0 , channel.size());
+            long numTransferred = channel.transferTo(0, channel.size(), copyChannel);
+            System.out.println("Num transferred = " + numTransferred);
 
-            ByteBuffer integerBuffer = ByteBuffer.allocate(Integer.BYTES);
-            integerBuffer.putInt(245);
-            integerBuffer.flip();
-            binChannel.position(integerOnePosition);
-            binChannel.write(integerBuffer);
+            channel.close();
+            randomAccessFile.close();
+            copyChannel.close();
 
-            integerBuffer.flip();
-            integerBuffer.putInt(-98765);
-            integerBuffer.flip();
-            binChannel.position(integerTwoPosition);
-            binChannel.write(integerBuffer);
 
-            integerBuffer.flip();
-            integerBuffer.putInt(1000);
-            integerBuffer.flip();
-            binChannel.position(integerThreePosition);
-            binChannel.write(integerBuffer);
-
-            binChannel.position(stringPosition);
-            binChannel.write(ByteBuffer.wrap(outputString));
-            binChannel.position(stringTwoPosition);
-            binChannel.write(ByteBuffer.wrap(outputBytes2));
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }
