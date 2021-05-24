@@ -17,10 +17,22 @@ public class Main {
         Path path = FileSystems.getDefault().getPath("WorkingDirectoryFile.txt");
         printFile(path);
 
+        System.out.println("******************************************************");
+
+//        Path filePath = FileSystems.getDefault().getPath("Paths","files","SubdirectoryFile.txt");
+        Path filePath = Paths.get("Paths","files","SubdirectoryFile.txt");
+        System.out.println(filePath);
+        printFile(filePath);
+        System.out.println("******************************************************");
+
+
+        filePath = Paths.get("");
+        System.out.println(filePath.toAbsolutePath());
 
         System.out.println("******************************************************");
-        Path filePath = FileSystems.getDefault().getPath("Paths","files","SubdirectoryFile.txt");
-        printFile(filePath);
+
+        Path path2 = FileSystems.getDefault().getPath(".","Paths", "files", "..", "files", "SubdirectoryFile.txt");
+        System.out.println(path2.normalize().toAbsolutePath());
 
 
     }

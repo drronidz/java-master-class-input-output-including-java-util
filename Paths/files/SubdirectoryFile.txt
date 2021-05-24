@@ -1,0 +1,4 @@
+File within the working directory.
+Lorem ipsum dolor sit amet, consecteteur adipiscing elit.
+Lorem ipsum dolor sit amet, consecteteur adipiscing elit.
+Lorem ipsum dolor sit amet, consecteteur adipiscing elit.
